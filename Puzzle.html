@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Puzzle Game - Sliding Puzzle | Main Gratis</title>
+    <meta name="description" content="Game puzzle geser klasik dengan 3 level kesulitan. Acak ubin dan susun hingga berurutan. Mainkan secara gratis di browser!">
+    <meta name="keywords" content="puzzle game, sliding puzzle, brain game, game offline, html5 game">
+    <meta name="author" content="Puzzle Game">
+    <meta property="og:title" content="Puzzle Game - Sliding Puzzle">
+    <meta property="og:description" content="Asah otak dengan puzzle geser. Tersedia 3x3, 4x4, dan 5x5!">
+    <meta property="og:type" content="game">
+    <meta name="twitter:card" content="summary">
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-wrapper {
+            max-width: 550px;
+            width: 100%;
+        }
+
+        .game-container {
+            background: rgba(46, 34, 21, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 72px;
+            padding: 25px 20px 30px 20px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.2);
+        }
+
+        .puzzle-card {
+            background: #f7e9d0;
+            border-radius: 48px;
+            padding: 20px;
+            box-shadow: inset 0 0 0 2px #fff8, 0 20px 30px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 28px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            background: #2e2415;
+            width: 100%;
+            height: auto;
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stats {
+            background: #2c1e12;
+            padding: 8px 18px;
+            border-radius: 60px;
+            color: #ffefcf;
+            font-weight: bold;
+            box-shadow: inset 0 1px 3px #5f3e28, 0 5px 8px #00000030;
+            font-size: 1.2rem;
+        }
+
+        .stats span {
+            color: #f9b81b;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-left: 8px;
+        }
+
+        button {
+            background: #f5bc70;
+            border: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-family: inherit;
+            color: #2d2b1f;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 0 #9b6a3c;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #9b6a3c;
+        }
+
+        .message-area {
+            text-align: center;
+            margin-top: 18px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: #efe3c9;
+            display: inline-block;
+            width: auto;
+            padding: 6px 24px;
+            border-radius: 40px;
+            color: #3a2a1c;
+            letter-spacing: 1px;
+        }
+
+        .difficulty {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .difficulty button {
+            background: #aa8e66;
+            box-shadow: 0 4px 0 #5e3e28;
+            color: #fff3e0;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+        }
+
+        .difficulty .active-diff {
+            background: #f5a623;
+            color: #2c1e12;
+            box-shadow: 0 4px 0 #b45f1b;
+        }
+
+        /* Panel Publikasi */
+        .publish-panel {
+            margin-top: 20px;
+            background: #2c2418cc;
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 16px 20px;
+            text-align: center;
+        }
+
+        .publish-title {
+            color: #ffdd99;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .publish-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .publish-btn {
+            background: #3e2a1f;
+            box-shadow: 0 3px 0 #1f140c;
+            color: #ffecb3;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .publish-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #1f140c;
+        }
+
+        .share-link-container {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #1e1610;
+            border-radius: 60px;
+            padding: 6px 12px;
+        }
+
+        #shareUrlInput {
+            flex: 1;
+            background: #fff3e2;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            font-family: monospace;
+            color: #2c2418;
+            outline: none;
+        }
+
+        .copy-btn {
+            background: #f5bc70;
+            box-shadow: 0 2px 0 #9b6a3c;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2e2415dd;
+            backdrop-filter: blur(10px);
+            color: #ffefcf;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 1000;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 18px;
+            color: #f1e2c9;
+            font-size: 0.75rem;
+            text-shadow: 1px 1px 0 #2c3e1f;
+        }
+
+        @media (max-width: 550px) {
+            .puzzle-card {
+                padding: 12px;
+            }
+            .stats {
+                font-size: 0.9rem;
+                padding: 5px 14px;
+            }
+            .stats span {
+                font-size: 1.3rem;
+            }
+            button {
+                font-size: 0.9rem;
+                padding: 6px 18px;
+            }
+            .publish-btn {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+            }
+            .toast-msg {
+                font-size: 0.75rem;
+                white-space: nowrap;
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="game-container">
+        <div class="puzzle-card">
+            <canvas id="puzzleCanvas" width="400" height="400"></canvas>
+
+            <div class="info-panel">
+                <div class="stats">🏆 LANGKAH <span id="moveCount">0</span></div>
+                <div class="stats">⏱️ WAKTU <span id="timerDisplay">00:00</span></div>
+                <button id="shuffleBtn">🔀 ACAK</button>
+            </div>
+
+            <div id="victoryMessage" class="message-area" style="display: none;">✨ SELAMAT! PUZZLE TERSELESAIKAN ✨</div>
+
+            <div class="difficulty">
+                <button data-size="3" class="diff-btn">3x3 Mudah</button>
+                <button data-size="4" class="diff-btn active-diff">4x4 Sedang</button>
+                <button data-size="5" class="diff-btn">5x5 Sulit</button>
+            </div>
+            <footer>Klik ubin yang berdekatan dengan lubang kosong untuk menggeser</footer>
+        </div>
+
+        <!-- PANEL PUBLIKASI / CARA PUBLIK -->
+        <div class="publish-panel">
+            <div class="publish-title">
+                📢 PUBLIKASI GAME
+            </div>
+            <div class="publish-buttons">
+                <button id="publishFullscreenBtn" class="publish-btn">🖥️ Mode Layar Penuh</button>
+                <button id="publishDownloadBtn" class="publish-btn">💾 Simpan Game (HTML)</button>
+                <button id="publishShareBtn" class="publish-btn">📤 Bagikan Link</button>
+            </div>
+            <div class="share-link-container" id="shareLinkContainer" style="display: none;">
+                <input type="text" id="shareUrlInput" readonly value="">
+                <button id="copyLinkBtn" class="copy-btn">Salin</button>
+            </div>
+            <div style="font-size: 0.7rem; margin-top: 12px; color: #eeddbb;">
+                💡 Tips: Simpan file HTML lalu unggah ke Netlify / GitHub Pages / atau kirim ke teman
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- KONFIGURASI PUZZLE ----------
+        const canvas = document.getElementById('puzzleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let boardSize = 4;
+        let tileSize = 400 / boardSize;
+        let tiles = [];
+        let emptyRow = 0, emptyCol = 0;
+        let moves = 0;
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let gameCompleted = false;
+        
+        const moveSpan = document.getElementById('moveCount');
+        const timerSpan = document.getElementById('timerDisplay');
+        const victoryDiv = document.getElementById('victoryMessage');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const diffBtns = document.querySelectorAll('.diff-btn');
+        
+        function formatTime(sec) {
+            let mins = Math.floor(sec / 60);
+            let remainSec = sec % 60;
+            return `${mins.toString().padStart(2,'0')}:${remainSec.toString().padStart(2,'0')}`;
+        }
+        
+        function updateUI() {
+            moveSpan.innerText = moves;
+            timerSpan.innerText = formatTime(timerSeconds);
+        }
+        
+        function stopTimer() {
+            if(timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        function startTimer() {
+            if(timerInterval) stopTimer();
+            timerInterval = setInterval(() => {
+                if(!gameCompleted) {
+                    timerSeconds++;
+                    updateUI();
+                }
+            }, 1000);
+        }
+        
+        function isSolvable() {
+            let flat = [];
+            for(let i=0; i<boardSize; i++){
+                for(let j=0; j<boardSize; j++){
+                    flat.push(tiles[i][j]);
+                }
+            }
+            let invCount = 0;
+            for(let i=0; i<flat.length-1; i++){
+                if(flat[i] === 0) continue;
+                for(let j=i+1; j<flat.length; j++){
+                    if(flat[j] === 0) continue;
+                    if(flat[i] > flat[j]) invCount++;
+                }
+            }
+            if(boardSize % 2 === 1){
+                return (invCount % 2 === 0);
+            } else {
+                let emptyRowFromBottom = boardSize - emptyRow;
+                if(emptyRowFromBottom % 2 === 1){
+                    return (invCount % 2 === 0);
+                } else {
+                    return (invCount % 2 === 1);
+                }
+            }
+        }
+        
+        function initBoard() {
+            const total = boardSize * boardSize;
+            let flatTiles = [];
+            for(let i = 0; i < total; i++) flatTiles.push(i);
+            for(let i = flatTiles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [flatTiles[i], flatTiles[j]] = [flatTiles[j], flatTiles[i]];
+            }
+            tiles = Array(boardSize).fill().map(() => Array(boardSize).fill(0));
+            let idx = 0;
+            for(let r = 0; r < boardSize; r++) {
+                for(let c = 0; c < boardSize; c++) {
+                    tiles[r][c] = flatTiles[idx++];
+                    if(tiles[r][c] === 0) { emptyRow = r; emptyCol = c; }
+                }
+            }
+            if(!isSolvable()) {
+                for(let r = 0; r < boardSize && !isSolvable(); r++) {
+                    for(let c = 0; c < boardSize; c++) {
+                        if(tiles[r][c] !== 0) {
+                            for(let r2 = 0; r2 < boardSize; r2++) {
+                                for(let c2 = 0; c2 < boardSize; c2++) {
+                                    if((r2 !== r || c2 !== c) && tiles[r2][c2] !== 0) {
+                                        let temp = tiles[r][c];
+                                        tiles[r][c] = tiles[r2][c2];
+                                        tiles[r2][c2] = temp;
+                                        if(isSolvable()) break;
+                                        else { // swap back
+                                            let temp2 = tiles[r][c];
+                                            tiles[r][c] = tiles[r2][c2];
+                                            tiles[r2][c2] = temp2;
+                                        }
+                                    }
+                                }
+                                if(isSolvable()) break;
+                            }
+                            if(isSolvable()) break;
+                        }
+                    }
+                }
+            }
+            for(let r=0; r<boardSize; r++)
+                for(let c=0; c<boardSize; c++)
+                    if(tiles[r][c] === 0) { emptyRow = r; emptyCol = c; }
+            
+            moves = 0;
+            gameCompleted = false;
+            victoryDiv.style.display = 'none';
+            updateUI();
+            stopTimer();
+            timerSeconds = 0;
+            updateUI();
+            startTimer();
+            drawBoard();
+        }
+        
+        function drawBoard() {
+            const size = boardSize;
+            const tSize = 400 / size;
+            canvas.width = 400;
+            canvas.height = 400;
+            for(let r=0; r<size; r++) {
+                for(let c=0; c<size; c++) {
+                    let val = tiles[r][c];
+                    let x = c * tSize;
+                    let y = r * tSize;
+                    if(val === 0) {
+                        ctx.fillStyle = "#d9c5a7";
+                        ctx.fillRect(x, y, tSize, tSize);
+                        ctx.strokeStyle = "#b48c5c";
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(x+2, y+2, tSize-4, tSize-4);
+                        continue;
+                    }
+                    let gradient = ctx.createLinearGradient(x, y, x+tSize*0.3, y+tSize*0.3);
+                    gradient.addColorStop(0, '#fceabb');
+                    gradient.addColorStop(1, '#f8b55c');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x, y, tSize, tSize);
+                    ctx.strokeStyle = "#a76f3a";
+                    ctx.lineWidth = 1.8;
+                    ctx.strokeRect(x+1.5, y+1.5, tSize-3, tSize-3);
+                    ctx.font = `bold ${Math.floor(tSize * 0.45)}px "Segoe UI", "Poppins"`;
+                    ctx.fillStyle = "#2c1a0c";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(val.toString(), x + tSize/2, y + tSize/2);
+                }
+            }
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#8b6946";
+            for(let i=0; i<=size; i++) {
+                ctx.moveTo(i*tSize, 0);
+                ctx.lineTo(i*tSize, 400);
+                ctx.moveTo(0, i*tSize);
+                ctx.lineTo(400, i*tSize);
+                ctx.stroke();
+            }
+        }
+        
+        function tryMove(row, col) {
+            if(gameCompleted) return false;
+            if( (Math.abs(row - emptyRow) + Math.abs(col - emptyCol)) === 1 ) {
+                tiles[emptyRow][emptyCol] = tiles[row][col];
+                tiles[row][col] = 0;
+                emptyRow = row;
+                emptyCol = col;
+                moves++;
+                updateUI();
+                drawBoard();
+                if(checkWin()) {
+                    gameCompleted = true;
+                    stopTimer();
+                    victoryDiv.style.display = 'block';
+                    drawBoard();
+                }
+                return true;
+            }
+            return false;
+        }
+        
+        function checkWin() {
+            let expected = 1;
+            for(let r=0; r<boardSize; r++) {
+                for(let c=0; c<boardSize; c++) {
+                    if(r === boardSize-1 && c === boardSize-1) {
+                        if(tiles[r][c] !== 0) return false;
+                    } else {
+                        if(tiles[r][c] !== expected) return false;
+                        expected++;
+                    }
+                }
+            }
+            return true;
+        }
+        
+        function shuffleBoard(iterations = 280) {
+            if(gameCompleted) { initBoard(); return; }
+            const directions = [[-1,0],[1,0],[0,-1],[0,1]];
+            for(let step=0; step<iterations; step++) {
+                let neighbors = [];
+                for(let dir of directions) {
+                    let newRow = emptyRow + dir[0];
+                    let newCol = emptyCol + dir[1];
+                    if(newRow>=0 && newRow<boardSize && newCol>=0 && newCol<boardSize) {
+                        neighbors.push([newRow, newCol]);
+                    }
+                }
+                if(neighbors.length === 0) continue;
+                const [r,c] = neighbors[Math.floor(Math.random() * neighbors.length)];
+                tiles[emptyRow][emptyCol] = tiles[r][c];
+                tiles[r][c] = 0;
+                emptyRow = r;
+                emptyCol = c;
+            }
+            moves = 0;
+            gameCompleted = false;
+            victoryDiv.style.display = 'none';
+            updateUI();
+            stopTimer();
+            timerSeconds = 0;
+            updateUI();
+            startTimer();
+            drawBoard();
+        }
+        
+        function setBoardSize(newSize) {
+            if(boardSize !== newSize) {
+                boardSize = newSize;
+                tileSize = 400 / boardSize;
+                stopTimer();
+                initBoard();
+                diffBtns.forEach(btn => {
+                    if(parseInt(btn.getAttribute('data-size')) === newSize) {
+                        btn.classList.add('active-diff');
+                    } else {
+                        btn.classList.remove('active-diff');
+                    }
+                });
+            } else {
+                shuffleBoard(250);
+            }
+        }
+        
+        canvas.addEventListener('click', (e) => {
+            if(gameCompleted) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            let canvasX = (clientX - rect.left) * scaleX;
+            let canvasY = (clientY - rect.top) * scaleY;
+            if(canvasX >=0 && canvasX <=400 && canvasY>=0 && canvasY<=400) {
+                const col = Math.floor(canvasX / (400/boardSize));
+                const row = Math.floor(canvasY / (400/boardSize));
+                if(row>=0 && row<boardSize && col>=0 && col<boardSize) tryMove(row, col);
+            }
+        });
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let canvasX = (touch.clientX - rect.left) * scaleX;
+            let canvasY = (touch.clientY - rect.top) * scaleY;
+            if(canvasX >=0 && canvasX <=400 && canvasY>=0 && canvasY<=400) {
+                const col = Math.floor(canvasX / (400/boardSize));
+                const row = Math.floor(canvasY / (400/boardSize));
+                if(row>=0 && row<boardSize && col>=0 && col<boardSize) tryMove(row, col);
+            }
+        });
+        
+        shuffleBtn.addEventListener('click', () => {
+            if(gameCompleted) initBoard();
+            else shuffleBoard(280);
+        });
+        diffBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const newSize = parseInt(btn.getAttribute('data-size'));
+                setBoardSize(newSize);
+            });
+        });
+        
+        // ========== FITUR PUBLIKASI ==========
+        function showToast(message, duration = 2000) {
+            let toast = document.querySelector('.toast-msg');
+            if(!toast) {
+                toast = document.createElement('div');
+                toast.className = 'toast-msg';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, duration);
+        }
+        
+        // Fullscreen mode
+        const fullscreenBtn = document.getElementById('publishFullscreenBtn');
+        fullscreenBtn.addEventListener('click', () => {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+                showToast('Mode layar penuh aktif (ESC untuk keluar)', 1500);
+            } else {
+                showToast('Browser tidak mendukung fullscreen', 1500);
+            }
+        });
+        
+        // Download game sebagai file HTML
+        const downloadBtn = document.getElementById('publishDownloadBtn');
+        downloadBtn.addEventListener('click', () => {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'puzzle_game.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('File game disimpan! Bagikan file .html ke teman', 2000);
+        });
+        
+        // Share link (menampilkan link saat ini)
+        const shareBtn = document.getElementById('publishShareBtn');
+        const shareContainer = document.getElementById('shareLinkContainer');
+        const shareUrlInput = document.getElementById('shareUrlInput');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        
+        shareBtn.addEventListener('click', () => {
+            let currentUrl = window.location.href;
+            if(currentUrl === 'about:blank' || currentUrl === '' || currentUrl.startsWith('blob:')) {
+                currentUrl = 'Simpan file HTML lalu unggah ke hosting (Netlify, GitHub Pages, dll)';
+                shareUrlInput.value = currentUrl;
+            } else {
+                shareUrlInput.value = currentUrl;
+            }
+            shareContainer.style.display = 'flex';
+            showToast('Link siap disalin!', 1200);
+        });
+        
+        copyLinkBtn.addEventListener('click', () => {
+            if(shareUrlInput.value && shareUrlInput.value !== '') {
+                navigator.clipboard.writeText(shareUrlInput.value).then(() => {
+                    showToast('Link tersalin! Kirim ke teman', 1500);
+                }).catch(() => {
+                    shareUrlInput.select();
+                    document.execCommand('copy');
+                    showToast('Link tersalin (manual)', 1500);
+                });
+            } else {
+                showToast('Tidak ada link, simpan file dulu', 1500);
+            }
+        });
+        
+        // instruksi tambahan untuk publikasi: 
+        const publishNote = document.createElement('div');
+        publishNote.style.fontSize = '0.7rem';
+        publishNote.style.marginTop = '8px';
+        publishNote.style.color = '#ffecb3';
+        publishNote.innerHTML = '⭐ Cara publikasi: Upload file .html ke Netlify, Vercel, atau GitHub Pages agar bisa diakses online.';
+        document.querySelector('.publish-panel').appendChild(publishNote);
+        
+        initBoard();
+    })();
+</script>
+</body>
+</html>
